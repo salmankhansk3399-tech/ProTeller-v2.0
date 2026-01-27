@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProTeller v2 - Bank Counter Balance Sheet</title>
+<style>
+:root {
+  --primary-color: #1a5f7a;
+  --secondary-color: #57cc99;
+  --accent-color: #ff9a3c;
+  --danger-color: #ff6b6b;
+  --success-color: #4caf50;
+  --warning-color: #ffa726;
+  --light-bg: #f8f9fa;
+  --light-card: #ffffff;
+  --light-text: #333333;
+  --light-border: #e0e0e0;
+  --dark-bg: #121826;
+  --dark-card: #1e293b;
+  --dark-text: #f1f5f9;
+  --dark-border: #334155;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --radius: 8px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--light-bg);
+  color: var(--light-text);
+  transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body.dark-mode {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Header */
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px 0;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-title h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.app-title p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+.header-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.theme-toggle {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.current-time {
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 5px 10px;
+  border-radius: var(--radius);
+}
+
+/* Main Layout */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 20px;
+  padding: 20px 0;
+  min-height: calc(100vh - 180px);
+}
+
+@media (max-width: 1200px) {
+  .main-layout {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+  
+  .logs-section {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+/* Common Card */
+.card {
+  background-color: var(--light-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--light-border);
+  transition: transform 0.2s;
+}
+
+body.dark-mode .card {
+  background-color: var(--dark-card);
+  border-color: var(--dark-border);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 8px;
+}
+
+body.dark-mode .card-title {
+  color: var(--secondary-color);
+}
+
+/* Cash Drawer Section */
+.cash-drawer {
+  height: 100%;
+}
+
+.denomination-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.denom-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: var(--radius);
+  background-color: rgba(87, 204, 153, 0.1);
+  border-left: 4px solid var(--secondary-color);
+}
+
+body.dark-mode .denom-item {
+  background-color: rgba(87, 204, 153, 0.15);
+}
+
+.denom-value {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.denom-count {
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.08);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.denom-total {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+body.dark-mode .denom-total {
+  color: var(--secondary-color);
+}
+
+.low-quantity {
+  background-color: rgba(255, 167, 38, 0.15) !important;
+  border-left-color: var(--warning-color) !important;
+}
+
+.critical-quantity {
+  background-color: rgba(255, 107, 107, 0.15) !important;
+  border-left-color: var(--danger-color) !important;
+}
+
+.drawer-summary {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(26, 95, 122, 0.1);
+  padding: 15px;
+  border-radius: var(--radius);
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+body.dark-mode .drawer-summary {
+  background-color: rgba(26, 95, 122, 0.2);
+}
+
+.total-notes, .total-coins, .total-cash {
+  text-align: center;
+}
+
+.total-amount {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+  margin-top: 5px;
+}
+
+body.dark-mode .total-amount {
+  color: var(--secondary-color);
+}
+
+/* Transaction Section */
+.transaction-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--light-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+body.dark-mode .mode-btn {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--dark-text);
+}
+
+.mode-btn.active {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.denom-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.denom-input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.denom-input-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.denom-input-group input {
+  padding: 10px;
+  border: 1px solid var(--light-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+body.dark-mode .denom-input-group input {
+  background-color: var(--dark-card);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+.transaction-total {
+  background-color: rgba(26, 95, 122, 0.1);
+  padding: 15px;
+  border-radius: var(--radius);
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.transaction-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+body.dark-mode .transaction-amount {
+  color: var(--secondary-color);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #144c63;
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #3d8b40;
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: #f57c00;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #ff5252;
+}
+
+.withdrawal-result {
+  background-color: rgba(255, 154, 60, 0.1);
+  padding: 15px;
+  border-radius: var(--radius);
+  margin-top: 20px;
+}
+
+.withdrawal-breakdown {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.breakdown-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  display: flex;
+  gap: 5px;
+}
+
+body.dark-mode .breakdown-item {
+  background-color: rgba(30, 41, 59, 0.8);
+}
+
+/* Logs Section */
+.logs-container {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.logs-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.logs-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.logs-container::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 10px;
+}
+
+.log-entry {
+  padding: 12px 15px;
+  border-left: 4px solid var(--secondary-color);
+  background-color: rgba(87, 204, 153, 0.1);
+  margin-bottom: 10px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+body.dark-mode .log-entry {
+  background-color: rgba(87, 204, 153, 0.15);
+}
+
+.log-entry.withdrawal {
+  border-left-color: var(--danger-color);
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+body.dark-mode .log-entry.withdrawal {
+  background-color: rgba(255, 107, 107, 0.15);
+}
+
+.log-time {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-bottom: 5px;
+}
+
+.log-details {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.log-amount {
+  font-size: 1.1rem;
+}
+
+/* Opening Balance Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: var(--light-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+}
+
+body.dark-mode .modal {
+  background-color: var(--dark-card);
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  text-align: center;
+}
+
+body.dark-mode .modal-title {
+  color: var(--secondary-color);
+}
+
+.modal-text {
+  margin-bottom: 25px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.opening-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.modal-summary {
+  background-color: rgba(26, 95, 122, 0.1);
+  padding: 20px;
+  border-radius: var(--radius);
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+}
+
+/* Footer */
+footer {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px 0;
+  margin-top: 20px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+.balance-summary {
+  display: flex;
+  gap: 20px;
+}
+
+.balance-item {
+  text-align: center;
+}
+
+.balance-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.balance-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+.error-message {
+  background-color: rgba(255, 107, 107, 0.1);
+  color: var(--danger-color);
+  padding: 10px 15px;
+  border-radius: var(--radius);
+  margin-bottom: 15px;
+  border-left: 4px solid var(--danger-color);
+  font-weight: 600;
+}
+
+.success-message {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--success-color);
+  padding: 10px 15px;
+  border-radius: var(--radius);
+  margin-bottom: 15px;
+  border-left: 4px solid var(--success-color);
+  font-weight: 600;
+}
+
+.alert {
+  padding: 10px 15px;
+  border-radius: var(--radius);
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.alert-warning {
+  background-color: rgba(255, 167, 38, 0.1);
+  color: var(--warning-color);
+  border-left: 4px solid var(--warning-color);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-content">
+      <div class="app-title">
+        <h1>ProTeller v2</h1>
+        <p>Precision. Speed. Trust.</p>
+      </div>
+      <div class="header-controls">
+        <div class="current-time" id="currentTime"></div>
+        <button class="theme-toggle" id="themeToggle">
+          <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-layout">
+    <!-- Left Panel: Cash Drawer -->
+    <section class="cash-drawer">
+      <div class="card">
+        <h2 class="card-title">💰 Cash Drawer</h2>
+        <div class="denomination-grid" id="cashDrawer">
+          <!-- Dynamically populated by JavaScript -->
+        </div>
+        <div class="drawer-summary">
+          <div class="total-notes">
+            <div>Total Notes</div>
+            <div class="total-amount" id="totalNotes">0</div>
+          </div>
+          <div class="total-coins">
+            <div>Total Coins</div>
+            <div class="total-amount" id="totalCoins">0</div>
+          </div>
+          <div class="total-cash">
+            <div>Total Cash</div>
+            <div class="total-amount" id="totalCash">Rs 0</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">📊 End of Day</h2>
+        <div class="eod-summary">
+          <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span>Opening Balance:</span>
+              <span id="openingBalanceDisplay">Rs 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span>Total Deposits:</span>
+              <span style="color: var(--success-color);" id="totalDepositsDisplay">Rs 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span>Total Withdrawals:</span>
+              <span style="color: var(--danger-color);" id="totalWithdrawalsDisplay">Rs 0</span>
+            </div>
+            <hr style="margin: 15px 0; border-color: var(--light-border);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700;">
+              <span>System Closing Balance:</span>
+              <span id="systemClosingDisplay">Rs 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span>Physical Cash:</span>
+              <span id="physicalCashDisplay">Rs 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem;">
+              <span>Difference:</span>
+              <span id="differenceDisplay">Rs 0</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="reconcileBtn" style="width: 100%;">
+            🔄 Reconcile & Generate Report
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Center Panel: Transactions -->
+    <section class="transaction-section">
+      <div class="card">
+        <h2 class="card-title">💵 Transactions</h2>
+        
+        <div class="mode-selector">
+          <button class="mode-btn active" id="depositModeBtn">Deposit (Cash In)</button>
+          <button class="mode-btn" id="withdrawalModeBtn">Withdrawal (Cash Out)</button>
+        </div>
+        
+        <!-- Deposit Interface -->
+        <div id="depositInterface">
+          <div class="denom-inputs" id="depositInputs">
+            <!-- Dynamically populated by JavaScript -->
+          </div>
+          
+          <div class="transaction-total">
+            <div>Total Deposit Amount</div>
+            <div class="transaction-amount" id="depositTotal">Rs 0</div>
+          </div>
+          
+          <div class="action-buttons">
+            <button class="btn btn-warning" id="clearDepositBtn">
+              🗑️ Clear
+            </button>
+            <button class="btn btn-success" id="submitDepositBtn">
+              💰 Deposit Cash
+            </button>
+          </div>
+        </div>
+        
+        <!-- Withdrawal Interface -->
+        <div id="withdrawalInterface" class="hidden">
+          <div style="margin-bottom: 20px;">
+            <label for="withdrawalAmount" style="display: block; font-weight: 600; margin-bottom: 8px;">Withdrawal Amount (Rs)</label>
+            <input type="number" id="withdrawalAmount" min="1" step="1" placeholder="Enter amount to withdraw" style="width: 100%; padding: 12px; border: 1px solid var(--light-border); border-radius: var(--radius); font-size: 1.2rem; font-weight: 600;">
+          </div>
+          
+          <div class="transaction-total">
+            <div>Withdrawal Breakdown</div>
+            <div class="transaction-amount" id="withdrawalTotal">Rs 0</div>
+          </div>
+          
+          <div id="withdrawalResult" class="withdrawal-result hidden">
+            <div style="font-weight: 600; margin-bottom: 10px;">Notes to Dispense:</div>
+            <div class="withdrawal-breakdown" id="withdrawalBreakdown">
+              <!-- Dynamically populated by JavaScript -->
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <button class="btn btn-warning" id="clearWithdrawalBtn">
+              🗑️ Clear
+            </button>
+            <button class="btn btn-danger" id="submitWithdrawalBtn">
+              💸 Withdraw Cash
+            </button>
+          </div>
+        </div>
+        
+        <div id="transactionMessage" class="hidden"></div>
+      </div>
+      
+      <div class="card">
+        <h2 class="card-title">⚙️ Quick Actions</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <button class="btn btn-primary" id="resetDrawerBtn">
+            🔄 Reset Drawer
+          </button>
+          <button class="btn btn-warning" id="editOpeningBtn">
+            ✏️ Edit Opening Balance
+          </button>
+          <button class="btn btn-danger" id="clearLogsBtn">
+            🗑️ Clear Logs
+          </button>
+          <button class="btn btn-success" id="exportDataBtn">
+            📤 Export Data
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Panel: Transaction Logs -->
+    <section class="logs-section">
+      <div class="card">
+        <h2 class="card-title">📋 Transaction Logs</h2>
+        <div class="logs-container" id="transactionLogs">
+          <!-- Dynamically populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div>
+        <div style="font-weight: 700;">ProTeller v2 - Bank Teller System</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">© 2026 Salman Khan. All rights reserved.</div>
+      </div>
+      <div class="balance-summary">
+        <div class="balance-item">
+          <div class="balance-label">Available Cash</div>
+          <div class="balance-value" id="footerCash">Rs 0</div>
+        </div>
+        <div class="balance-item">
+          <div class="balance-label">Today's Transactions</div>
+          <div class="balance-value" id="footerTransactions">0</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- Opening Balance Modal -->
+<div id="openingBalanceModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2 class="modal-title">Set Opening Balance</h2>
+    <p class="modal-text">Enter the denomination-wise cash count for opening balance. This will initialize your cash drawer.</p>
+    
+    <div class="opening-inputs" id="openingInputs">
+      <!-- Dynamically populated by JavaScript -->
+    </div>
+    
+    <div class="modal-summary">
+      <div>Total Opening Balance</div>
+      <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin: 10px 0;" id="openingBalanceTotal">Rs 0</div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>Total Notes: <strong id="openingNotesTotal">0</strong></span>
+        <span>Total Coins: <strong id="openingCoinsTotal">0</strong></span>
+      </div>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="cancelOpeningBtn" style="flex: 1;">
+        Cancel
+      </button>
+      <button class="btn btn-success" id="confirmOpeningBtn" style="flex: 2;">
+        ✅ Confirm Opening Balance & Start Session
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Configuration for Pakistani Currency
+const CURRENCY_CONFIG = {
+  notes: [
+    { value: 5000, name: "5000 Rupees", type: "note", color: "#4caf50" },
+    { value: 1000, name: "1000 Rupees", type: "note", color: "#2196f3" },
+    { value: 500, name: "500 Rupees", type: "note", color: "#9c27b0" },
+    { value: 100, name: "100 Rupees", type: "note", color: "#ff9800" },
+    { value: 50, name: "50 Rupees", type: "note", color: "#795548" },
+    { value: 20, name: "20 Rupees", type: "note", color: "#607d8b" },
+    { value: 10, name: "10 Rupees", type: "note", color: "#009688" }
+  ],
+  coins: [
+    { value: 10, name: "10 Rupees", type: "coin", color: "#ff5722" },
+    { value: 5, name: "5 Rupees", type: "coin", color: "#e91e63" },
+    { value: 2, name: "2 Rupees", type: "coin", color: "#3f51b5" },
+    { value: 1, name: "1 Rupee", type: "coin", color: "#00bcd4" }
+  ],
+  // Thresholds for low/critical quantity alerts
+  thresholds: {
+    low: 10,     // Show warning when below 10 notes/coins
+    critical: 3  // Show critical alert when below 3 notes/coins
+  }
+};
+
+// Application State
+const AppState = {
+  cashDrawer: {},
+  openingBalance: 0,
+  totalDeposits: 0,
+  totalWithdrawals: 0,
+  transactions: [],
+  sessionStarted: false,
+  darkMode: false
+};
+
+// Initialize cash drawer with zero values
+function initializeCashDrawer() {
+  AppState.cashDrawer = {};
+  
+  // Initialize notes
+  CURRENCY_CONFIG.notes.forEach(denom => {
+    AppState.cashDrawer[denom.value] = {
+      ...denom,
+      count: 0,
+      total: 0
+    };
+  });
+  
+  // Initialize coins
+  CURRENCY_CONFIG.coins.forEach(denom => {
+    AppState.cashDrawer[denom.value] = {
+      ...denom,
+      count: 0,
+      total: 0
+    };
+  });
+}
+
+// Load data from localStorage
+function loadFromStorage() {
+  const savedData = localStorage.getItem('proteller_v2_data');
+  if (savedData) {
+    try {
+      const parsed = JSON.parse(savedData);
+      AppState.cashDrawer = parsed.cashDrawer || AppState.cashDrawer;
+      AppState.openingBalance = parsed.openingBalance || 0;
+      AppState.totalDeposits = parsed.totalDeposits || 0;
+      AppState.totalWithdrawals = parsed.totalWithdrawals || 0;
+      AppState.transactions = parsed.transactions || [];
+      AppState.sessionStarted = parsed.sessionStarted || false;
+      
+      // Set dark mode from storage
+      const darkMode = localStorage.getItem('proteller_dark_mode') === 'true';
+      toggleDarkMode(darkMode);
+    } catch (e) {
+      console.error('Error loading saved data:', e);
+    }
+  }
+}
+
+// Save data to localStorage
+function saveToStorage() {
+  const data = {
+    cashDrawer: AppState.cashDrawer,
+    openingBalance: AppState.openingBalance,
+    totalDeposits: AppState.totalDeposits,
+    totalWithdrawals: AppState.totalWithdrawals,
+    transactions: AppState.transactions,
+    sessionStarted: AppState.sessionStarted,
+    lastUpdated: new Date().toISOString()
+  };
+  
+  localStorage.setItem('proteller_v2_data', JSON.stringify(data));
+}
+
+// Toggle dark mode
+function toggleDarkMode(enable) {
+  AppState.darkMode = enable !== undefined ? enable : !AppState.darkMode;
+  
+  if (AppState.darkMode) {
+    document.body.classList.add('dark-mode');
+    document.getElementById('themeIcon').textContent = '☀️';
+    document.getElementById('themeText').textContent = 'Light Mode';
+  } else {
+    document.body.classList.remove('dark-mode');
+    document.getElementById('themeIcon').textContent = '🌙';
+    document.getElementById('themeText').textContent = 'Dark Mode';
+  }
+  
+  localStorage.setItem('proteller_dark_mode', AppState.darkMode);
+}
+
+// Update current time display
+function updateCurrentTime() {
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('en-PK', { 
+    hour12: true, 
+    hour: '2-digit', 
+    minute: '2-digit',
+    second: '2-digit'
+  });
+  const dateString = now.toLocaleDateString('en-PK', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+  
+  document.getElementById('currentTime').textContent = `${dateString} | ${timeString}`;
+}
+
+// Calculate total cash in drawer
+function calculateDrawerTotals() {
+  let totalNotes = 0;
+  let totalCoins = 0;
+  let totalCash = 0;
+  
+  Object.values(AppState.cashDrawer).forEach(denom => {
+    const total = denom.count * denom.value;
+    denom.total = total;
+    
+    if (denom.type === 'note') {
+      totalNotes += denom.count;
+    } else {
+      totalCoins += denom.count;
+    }
+    
+    totalCash += total;
+  });
+  
+  return { totalNotes, totalCoins, totalCash };
+}
+
+// Update cash drawer display
+function updateCashDrawerDisplay() {
+  const drawerContainer = document.getElementById('cashDrawer');
+  const { totalNotes, totalCoins, totalCash } = calculateDrawerTotals();
+  
+  // Update summary
+  document.getElementById('totalNotes').textContent = totalNotes;
+  document.getElementById('totalCoins').textContent = totalCoins;
+  document.getElementById('totalCash').textContent = `Rs ${formatCurrency(totalCash)}`;
+  
+  // Update footer
+  document.getElementById('footerCash').textContent = `Rs ${formatCurrency(totalCash)}`;
+  document.getElementById('footerTransactions').textContent = AppState.transactions.length;
+  
+  // Update drawer items
+  drawerContainer.innerHTML = '';
+  
+  // Sort denominations by value (highest first)
+  const sortedDenominations = Object.values(AppState.cashDrawer)
+    .sort((a, b) => b.value - a.value);
+  
+  sortedDenominations.forEach(denom => {
+    const denomItem = document.createElement('div');
+    denomItem.className = 'denom-item';
+    
+    // Apply low/critical quantity classes
+    if (denom.count <= CURRENCY_CONFIG.thresholds.critical) {
+      denomItem.classList.add('critical-quantity');
+    } else if (denom.count <= CURRENCY_CONFIG.thresholds.low) {
+      denomItem.classList.add('low-quantity');
+    }
+    
+    denomItem.innerHTML = `
+      <div>
+        <div class="denom-value">${denom.name}</div>
+        <div style="font-size: 0.8rem; opacity: 0.8;">Value: Rs ${denom.value}</div>
+      </div>
+      <div style="text-align: right;">
+        <div class="denom-count">${denom.count} ${denom.type === 'note' ? 'notes' : 'coins'}</div>
+        <div class="denom-total">Rs ${formatCurrency(denom.total)}</div>
+      </div>
+    `;
+    
+    drawerContainer.appendChild(denomItem);
+  });
+  
+  // Update EOD display
+  updateEODDisplay();
+}
+
+// Update End of Day display
+function updateEODDisplay() {
+  const { totalCash } = calculateDrawerTotals();
+  const systemClosing = AppState.openingBalance + AppState.totalDeposits - AppState.totalWithdrawals;
+  const difference = totalCash - systemClosing;
+  
+  document.getElementById('openingBalanceDisplay').textContent = `Rs ${formatCurrency(AppState.openingBalance)}`;
+  document.getElementById('totalDepositsDisplay').textContent = `Rs ${formatCurrency(AppState.totalDeposits)}`;
+  document.getElementById('totalWithdrawalsDisplay').textContent = `Rs ${formatCurrency(AppState.totalWithdrawals)}`;
+  document.getElementById('systemClosingDisplay').textContent = `Rs ${formatCurrency(systemClosing)}`;
+  document.getElementById('physicalCashDisplay').textContent = `Rs ${formatCurrency(totalCash)}`;
+  
+  const differenceElem = document.getElementById('differenceDisplay');
+  differenceElem.textContent = `Rs ${formatCurrency(Math.abs(difference))}`;
+  
+  if (difference > 0) {
+    differenceElem.style.color = 'var(--success-color)';
+    differenceElem.textContent = `+Rs ${formatCurrency(difference)} (Over)`;
+  } else if (difference < 0) {
+    differenceElem.style.color = 'var(--danger-color)';
+    differenceElem.textContent = `-Rs ${formatCurrency(Math.abs(difference))} (Short)`;
+  } else {
+    differenceElem.style.color = 'var(--success-color)';
+    differenceElem.textContent = `Rs ${formatCurrency(difference)} (Balanced)`;
+  }
+}
+
+// Create input fields for denominations
+function createDenominationInputs(containerId, onChangeCallback, values = {}) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  
+  // Sort denominations by value (highest first)
+  const sortedDenominations = Object.values(AppState.cashDrawer)
+    .sort((a, b) => b.value - a.value);
+  
+  sortedDenominations.forEach(denom => {
+    const inputGroup = document.createElement('div');
+    inputGroup.className = 'denom-input-group';
+    
+    inputGroup.innerHTML = `
+      <label for="denom-${denom.value}">${denom.name}</label>
+      <input 
+        type="number" 
+        id="denom-${denom.value}" 
+        min="0" 
+        step="1" 
+        value="${values[denom.value] || 0}"
+        data-value="${denom.value}"
+        data-type="${denom.type}"
+        placeholder="0"
+      >
+    `;
+    
+    container.appendChild(inputGroup);
+  });
+  
+  // Add event listeners to all inputs
+  container.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', onChangeCallback);
+  });
+}
+
+// Calculate total from denomination inputs
+function calculateInputTotal(containerId) {
+  const container = document.getElementById(containerId);
+  let total = 0;
+  
+  container.querySelectorAll('input').forEach(input => {
+    const count = parseInt(input.value) || 0;
+    const value = parseInt(input.dataset.value);
+    total += count * value;
+  });
+  
+  return total;
+}
+
+// Format currency with commas
+function formatCurrency(amount) {
+  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Show message to user
+function showMessage(message, type = 'success') {
+  const messageDiv = document.getElementById('transactionMessage');
+  messageDiv.textContent = message;
+  messageDiv.className = `${type}-message`;
+  messageDiv.classList.remove('hidden');
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    messageDiv.classList.add('hidden');
+  }, 5000);
+}
+
+// Add transaction to log
+function addTransaction(type, amount, breakdown = {}) {
+  const transaction = {
+    id: Date.now(),
+    type,
+    amount,
+    breakdown,
+    timestamp: new Date().toISOString()
+  };
+  
+  AppState.transactions.unshift(transaction);
+  
+  // Update totals
+  if (type === 'deposit') {
+    AppState.totalDeposits += amount;
+  } else if (type === 'withdrawal') {
+    AppState.totalWithdrawals += amount;
+  }
+  
+  // Save and update UI
+  saveToStorage();
+  updateTransactionLogs();
+  updateCashDrawerDisplay();
+  
+  return transaction;
+}
+
+// Update transaction logs display
+function updateTransactionLogs() {
+  const logsContainer = document.getElementById('transactionLogs');
+  logsContainer.innerHTML = '';
+  
+  if (AppState.transactions.length === 0) {
+    logsContainer.innerHTML = `
+      <div style="text-align: center; padding: 30px; color: #999; font-style: italic;">
+        No transactions yet. Start by setting your opening balance.
+      </div>
+    `;
+    return;
+  }
+  
+  AppState.transactions.forEach(transaction => {
+    const logEntry = document.createElement('div');
+    logEntry.className = `log-entry ${transaction.type}`;
+    
+    const date = new Date(transaction.timestamp);
+    const timeString = date.toLocaleTimeString('en-PK', { 
+      hour12: true, 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+    const dateString = date.toLocaleDateString('en-PK', {
+      month: 'short',
+      day: 'numeric'
+    });
+    
+    // Create breakdown string
+    let breakdownHtml = '';
+    if (transaction.breakdown && Object.keys(transaction.breakdown).length > 0) {
+      breakdownHtml = '<div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">';
+      Object.entries(transaction.breakdown).forEach(([value, count]) => {
+        if (count > 0) {
+          breakdownHtml += `${count} × ${value}, `;
+        }
+      });
+      breakdownHtml = breakdownHtml.slice(0, -2); // Remove trailing comma
+      breakdownHtml += '</div>';
+    }
+    
+    logEntry.innerHTML = `
+      <div class="log-time">${dateString} at ${timeString}</div>
+      <div class="log-details">
+        <div>
+          <span style="text-transform: uppercase; font-weight: 700; color: ${transaction.type === 'deposit' ? 'var(--success-color)' : 'var(--danger-color)'}">
+            ${transaction.type === 'deposit' ? 'DEPOSIT' : 'WITHDRAWAL'}
+          </span>
+          ${breakdownHtml}
+        </div>
+        <div class="log-amount" style="color: ${transaction.type === 'deposit' ? 'var(--success-color)' : 'var(--danger-color)'}">
+          ${transaction.type === 'deposit' ? '+' : '-'}Rs ${formatCurrency(transaction.amount)}
+        </div>
+      </div>
+    `;
+    
+    logsContainer.appendChild(logEntry);
+  });
+}
+
+// Smart denomination algorithm for withdrawals
+function calculateWithdrawalBreakdown(amount) {
+  let remaining = amount;
+  const breakdown = {};
+  const availableDenominations = Object.values(AppState.cashDrawer)
+    .sort((a, b) => b.value - a.value);
+  
+  // Initialize breakdown with zero values
+  availableDenominations.forEach(denom => {
+    breakdown[denom.value] = 0;
+  });
+  
+  // First pass: Use available notes/coins
+  for (const denom of availableDenominations) {
+    if (remaining <= 0) break;
+    
+    if (denom.count > 0 && denom.value <= remaining) {
+      const maxPossible = Math.min(
+        Math.floor(remaining / denom.value),
+        denom.count
+      );
+      
+      if (maxPossible > 0) {
+        breakdown[denom.value] = maxPossible;
+        remaining -= maxPossible * denom.value;
+      }
+    }
+  }
+  
+  // If we couldn't dispense exact amount, try to find alternative combinations
+  if (remaining > 0) {
+    // Reset and try a more aggressive approach
+    remaining = amount;
+    Object.keys(breakdown).forEach(key => breakdown[key] = 0);
+    
+    // Try using smaller denominations if larger ones aren't available
+    for (const denom of availableDenominations) {
+      if (remaining <= 0) break;
+      
+      if (denom.value <= remaining) {
+        const maxPossible = Math.min(
+          Math.floor(remaining / denom.value),
+          denom.count
+        );
+        
+        if (maxPossible > 0) {
+          breakdown[denom.value] = maxPossible;
+          remaining -= maxPossible * denom.value;
+        }
+      }
+    }
+  }
+  
+  return {
+    breakdown,
+    remaining,
+    success: remaining === 0
+  };
+}
+
+// Process withdrawal
+function processWithdrawal(amount) {
+  // Check if amount is valid
+  if (!amount || amount <= 0) {
+    showMessage('Please enter a valid withdrawal amount.', 'error');
+    return false;
+  }
+  
+  // Check if we have enough total cash
+  const { totalCash } = calculateDrawerTotals();
+  if (amount > totalCash) {
+    showMessage(`Insufficient funds. Available: Rs ${formatCurrency(totalCash)}`, 'error');
+    return false;
+  }
+  
+  // Calculate breakdown
+  const result = calculateWithdrawalBreakdown(amount);
+  
+  if (!result.success) {
+    showMessage(`Cannot dispense exact amount. Short by Rs ${formatCurrency(result.remaining)}. Please try a different amount.`, 'error');
+    return false;
+  }
+  
+  // Check if we have enough of each denomination
+  for (const [value, count] of Object.entries(result.breakdown)) {
+    if (count > AppState.cashDrawer[value].count) {
+      showMessage(`Insufficient ${value} notes/coins. Available: ${AppState.cashDrawer[value].count}`, 'error');
+      return false;
+    }
+  }
+  
+  // Update cash drawer
+  for (const [value, count] of Object.entries(result.breakdown)) {
+    if (count > 0) {
+      AppState.cashDrawer[value].count -= count;
+    }
+  }
+  
+  // Add transaction
+  addTransaction('withdrawal', amount, result.breakdown);
+  
+  showMessage(`Successfully withdrew Rs ${formatCurrency(amount)}`, 'success');
+  return true;
+}
+
+// Process deposit
+function processDeposit(inputValues) {
+  let totalAmount = 0;
+  const breakdown = {};
+  
+  // Calculate total and breakdown
+  for (const [value, count] of Object.entries(inputValues)) {
+    if (count > 0) {
+      const numCount = parseInt(count);
+      totalAmount += numCount * parseInt(value);
+      breakdown[value] = numCount;
+      
+      // Update cash drawer
+      AppState.cashDrawer[value].count += numCount;
+    }
+  }
+  
+  if (totalAmount === 0) {
+    showMessage('Please enter at least one denomination to deposit.', 'error');
+    return false;
+  }
+  
+  // Add transaction
+  addTransaction('deposit', totalAmount, breakdown);
+  
+  showMessage(`Successfully deposited Rs ${formatCurrency(totalAmount)}`, 'success');
+  return true;
+}
+
+// Set opening balance
+function setOpeningBalance(inputValues) {
+  let totalAmount = 0;
+  let totalNotes = 0;
+  let totalCoins = 0;
+  
+  // Reset cash drawer
+  initializeCashDrawer();
+  
+  // Set opening balance values
+  for (const [value, count] of Object.entries(inputValues)) {
+    if (count > 0) {
+      const numCount = parseInt(count);
+      totalAmount += numCount * parseInt(value);
+      
+      // Update cash drawer
+      AppState.cashDrawer[value].count = numCount;
+      
+      // Count notes vs coins
+      if (AppState.cashDrawer[value].type === 'note') {
+        totalNotes += numCount;
+      } else {
+        totalCoins += numCount;
+      }
+    }
+  }
+  
+  if (totalAmount === 0) {
+    showMessage('Opening balance cannot be zero.', 'error');
+    return false;
+  }
+  
+  // Update app state
+  AppState.openingBalance = totalAmount;
+  AppState.totalDeposits = 0;
+  AppState.totalWithdrawals = 0;
+  AppState.transactions = [];
+  AppState.sessionStarted = true;
+  
+  // Save and update UI
+  saveToStorage();
+  updateCashDrawerDisplay();
+  updateTransactionLogs();
+  
+  showMessage(`Opening balance set: Rs ${formatCurrency(totalAmount)}`, 'success');
+  return true;
+}
+
+// Export data as JSON
+function exportData() {
+  const data = {
+    cashDrawer: AppState.cashDrawer,
+    openingBalance: AppState.openingBalance,
+    totalDeposits: AppState.totalDeposits,
+    totalWithdrawals: AppState.totalWithdrawals,
+    transactions: AppState.transactions,
+    exportDate: new Date().toISOString()
+  };
+  
+  const dataStr = JSON.stringify(data, null, 2);
+  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  
+  const exportFileDefaultName = `proteller_export_${new Date().toISOString().slice(0,10)}.json`;
+  
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.click();
+}
+
+// Initialize the application
+function initApp() {
+  // Initialize cash drawer
+  initializeCashDrawer();
+  
+  // Load data from storage
+  loadFromStorage();
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  // Update time display every second
+  updateCurrentTime();
+  setInterval(updateCurrentTime, 1000);
+  
+  // Create denomination inputs for deposit and opening balance
+  createDenominationInputs('depositInputs', updateDepositTotal);
+  createDenominationInputs('openingInputs', updateOpeningBalanceTotal);
+  
+  // Update UI
+  updateCashDrawerDisplay();
+  updateTransactionLogs();
+  
+  // Show opening balance modal if session not started
+  if (!AppState.sessionStarted) {
+    setTimeout(() => {
+      document.getElementById('openingBalanceModal').classList.remove('hidden');
+    }, 500);
+  }
+}
+
+// Set up all event listeners
+function setupEventListeners() {
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', () => toggleDarkMode());
+  
+  // Transaction mode toggle
+  document.getElementById('depositModeBtn').addEventListener('click', () => {
+    document.getElementById('depositModeBtn').classList.add('active');
+    document.getElementById('withdrawalModeBtn').classList.remove('active');
+    document.getElementById('depositInterface').classList.remove('hidden');
+    document.getElementById('withdrawalInterface').classList.add('hidden');
+    document.getElementById('withdrawalResult').classList.add('hidden');
+  });
+  
+  document.getElementById('withdrawalModeBtn').addEventListener('click', () => {
+    document.getElementById('withdrawalModeBtn').classList.add('active');
+    document.getElementById('depositModeBtn').classList.remove('active');
+    document.getElementById('withdrawalInterface').classList.remove('hidden');
+    document.getElementById('depositInterface').classList.add('hidden');
+    updateWithdrawalDisplay();
+  });
+  
+  // Deposit actions
+  document.getElementById('clearDepositBtn').addEventListener('click', () => {
+    createDenominationInputs('depositInputs', updateDepositTotal);
+    updateDepositTotal();
+  });
+  
+  document.getElementById('submitDepositBtn').addEventListener('click', () => {
+    if (!AppState.sessionStarted) {
+      showMessage('Please set opening balance first.', 'error');
+      return;
+    }
+    
+    const inputs = document.querySelectorAll('#depositInputs input');
+    const inputValues = {};
+    
+    inputs.forEach(input => {
+      const count = parseInt(input.value) || 0;
+      if (count > 0) {
+        inputValues[input.dataset.value] = count;
+      }
+    });
+    
+    if (processDeposit(inputValues)) {
+      createDenominationInputs('depositInputs', updateDepositTotal);
+      updateDepositTotal();
+    }
+  });
+  
+  // Withdrawal actions
+  document.getElementById('withdrawalAmount').addEventListener('input', updateWithdrawalDisplay);
+  
+  document.getElementById('clearWithdrawalBtn').addEventListener('click', () => {
+    document.getElementById('withdrawalAmount').value = '';
+    document.getElementById('withdrawalResult').classList.add('hidden');
+    updateWithdrawalDisplay();
+  });
+  
+  document.getElementById('submitWithdrawalBtn').addEventListener('click', () => {
+    if (!AppState.sessionStarted) {
+      showMessage('Please set opening balance first.', 'error');
+      return;
+    }
+    
+    const amount = parseInt(document.getElementById('withdrawalAmount').value) || 0;
+    
+    if (processWithdrawal(amount)) {
+      document.getElementById('withdrawalAmount').value = '';
+      document.getElementById('withdrawalResult').classList.add('hidden');
+      updateWithdrawalDisplay();
+    }
+  });
+  
+  // Opening balance modal
+  document.getElementById('cancelOpeningBtn').addEventListener('click', () => {
+    if (!AppState.sessionStarted) {
+      showMessage('You must set an opening balance to use the application.', 'warning');
+      return;
+    }
+    document.getElementById('openingBalanceModal').classList.add('hidden');
+  });
+  
+  document.getElementById('confirmOpeningBtn').addEventListener('click', () => {
+    const inputs = document.querySelectorAll('#openingInputs input');
+    const inputValues = {};
+    
+    inputs.forEach(input => {
+      const count = parseInt(input.value) || 0;
+      if (count > 0) {
+        inputValues[input.dataset.value] = count;
+      }
+    });
+    
+    if (setOpeningBalance(inputValues)) {
+      document.getElementById('openingBalanceModal').classList.add('hidden');
+    }
+  });
+  
+  document.getElementById('editOpeningBtn').addEventListener('click', () => {
+    // Pre-fill with current values
+    const inputValues = {};
+    Object.values(AppState.cashDrawer).forEach(denom => {
+      inputValues[denom.value] = denom.count;
+    });
+    
+    createDenominationInputs('openingInputs', updateOpeningBalanceTotal, inputValues);
+    updateOpeningBalanceTotal();
+    
+    document.getElementById('openingBalanceModal').classList.remove('hidden');
+  });
+  
+  // Quick actions
+  document.getElementById('resetDrawerBtn').addEventListener('click', () => {
+    if (confirm('Are you sure you want to reset the cash drawer? This will clear all transactions and set opening balance to zero.')) {
+      initializeCashDrawer();
+      AppState.openingBalance = 0;
+      AppState.totalDeposits = 0;
+      AppState.totalWithdrawals = 0;
+      AppState.transactions = [];
+      AppState.sessionStarted = false;
+      
+      saveToStorage();
+      updateCashDrawerDisplay();
+      updateTransactionLogs();
+      
+      // Show opening balance modal
+      createDenominationInputs('openingInputs', updateOpeningBalanceTotal);
+      updateOpeningBalanceTotal();
+      document.getElementById('openingBalanceModal').classList.remove('hidden');
+      
+      showMessage('Cash drawer has been reset.', 'success');
+    }
+  });
+  
+  document.getElementById('clearLogsBtn').addEventListener('click', () => {
+    if (AppState.transactions.length === 0) {
+      showMessage('No transactions to clear.', 'warning');
+      return;
+    }
+    
+    if (confirm('Are you sure you want to clear all transaction logs? This cannot be undone.')) {
+      AppState.transactions = [];
+      saveToStorage();
+      updateTransactionLogs();
+      showMessage('Transaction logs cleared.', 'success');
+    }
+  });
+  
+  document.getElementById('exportDataBtn').addEventListener('click', exportData);
+  
+  document.getElementById('reconcileBtn').addEventListener('click', () => {
+    const { totalCash } = calculateDrawerTotals();
+    const systemClosing = AppState.openingBalance + AppState.totalDeposits - AppState.totalWithdrawals;
+    const difference = totalCash - systemClosing;
+    
+    let message = `=== RECONCILIATION REPORT ===\n`;
+    message += `Date: ${new Date().toLocaleDateString('en-PK')}\n`;
+    message += `Opening Balance: Rs ${formatCurrency(AppState.openingBalance)}\n`;
+    message += `Total Deposits: Rs ${formatCurrency(AppState.totalDeposits)}\n`;
+    message += `Total Withdrawals: Rs ${formatCurrency(AppState.totalWithdrawals)}\n`;
+    message += `System Closing Balance: Rs ${formatCurrency(systemClosing)}\n`;
+    message += `Physical Cash Counted: Rs ${formatCurrency(totalCash)}\n`;
+    message += `Difference: Rs ${formatCurrency(Math.abs(difference))} ${difference > 0 ? '(Over)' : difference < 0 ? '(Short)' : '(Balanced)'}\n`;
+    message += `\nCash Drawer Breakdown:\n`;
+    
+    Object.values(AppState.cashDrawer)
+      .sort((a, b) => b.value - a.value)
+      .forEach(denom => {
+        if (denom.count > 0) {
+          message += `${denom.name}: ${denom.count} × Rs ${denom.value} = Rs ${formatCurrency(denom.total)}\n`;
+        }
+      });
+    
+    alert(message);
+    showMessage('Reconciliation report generated.', 'success');
+  });
+}
+
+// Update deposit total display
+function updateDepositTotal() {
+  const total = calculateInputTotal('depositInputs');
+  document.getElementById('depositTotal').textContent = `Rs ${formatCurrency(total)}`;
+}
+
+// Update opening balance total display
+function updateOpeningBalanceTotal() {
+  const total = calculateInputTotal('openingInputs');
+  const notesTotal = Array.from(document.querySelectorAll('#openingInputs input[data-type="note"]'))
+    .reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+  const coinsTotal = Array.from(document.querySelectorAll('#openingInputs input[data-type="coin"]'))
+    .reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+  
+  document.getElementById('openingBalanceTotal').textContent = `Rs ${formatCurrency(total)}`;
+  document.getElementById('openingNotesTotal').textContent = notesTotal;
+  document.getElementById('openingCoinsTotal').textContent = coinsTotal;
+}
+
+// Update withdrawal display
+function updateWithdrawalDisplay() {
+  const amount = parseInt(document.getElementById('withdrawalAmount').value) || 0;
+  document.getElementById('withdrawalTotal').textContent = `Rs ${formatCurrency(amount)}`;
+  
+  if (amount > 0) {
+    const result = calculateWithdrawalBreakdown(amount);
+    const breakdownContainer = document.getElementById('withdrawalBreakdown');
+    const resultContainer = document.getElementById('withdrawalResult');
+    
+    breakdownContainer.innerHTML = '';
+    
+    if (result.success) {
+      // Show breakdown
+      Object.entries(result.breakdown)
+        .sort(([a], [b]) => b - a)
+        .forEach(([value, count]) => {
+          if (count > 0) {
+            const breakdownItem = document.createElement('div');
+            breakdownItem.className = 'breakdown-item';
+            breakdownItem.textContent = `${count} × ${value}`;
+            breakdownContainer.appendChild(breakdownItem);
+          }
+        });
+      
+      resultContainer.classList.remove('hidden');
+    } else {
+      // Show warning
+      const warning = document.createElement('div');
+      warning.className = 'alert alert-warning';
+      warning.textContent = `Cannot dispense exact amount. Short by Rs ${formatCurrency(result.remaining)}`;
+      breakdownContainer.appendChild(warning);
+      resultContainer.classList.remove('hidden');
+    }
+  } else {
+    document.getElementById('withdrawalResult').classList.add('hidden');
+  }
+}
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
