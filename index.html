@@ -654,13 +654,11 @@ footer {
   </header>
 
   <main class="main-layout">
-    <!-- Left Panel: Cash Drawer -->
     <section class="cash-drawer">
       <div class="card">
         <h2 class="card-title">💰 Cash Drawer</h2>
         <div class="denomination-grid" id="cashDrawer">
-          <!-- Dynamically populated by JavaScript -->
-        </div>
+          </div>
         <div class="drawer-summary">
           <div class="total-notes">
             <div>Total Notes</div>
@@ -714,7 +712,6 @@ footer {
       </div>
     </section>
 
-    <!-- Center Panel: Transactions -->
     <section class="transaction-section">
       <div class="card">
         <h2 class="card-title">💵 Transactions</h2>
@@ -724,11 +721,9 @@ footer {
           <button class="mode-btn" id="withdrawalModeBtn">Withdrawal (Cash Out)</button>
         </div>
         
-        <!-- Deposit Interface -->
         <div id="depositInterface">
           <div class="denom-inputs" id="depositInputs">
-            <!-- Dynamically populated by JavaScript -->
-          </div>
+            </div>
           
           <div class="transaction-total">
             <div>Total Deposit Amount</div>
@@ -745,7 +740,6 @@ footer {
           </div>
         </div>
         
-        <!-- Withdrawal Interface -->
         <div id="withdrawalInterface" class="hidden">
           <div style="margin-bottom: 20px;">
             <label for="withdrawalAmount" style="display: block; font-weight: 600; margin-bottom: 8px;">Withdrawal Amount (Rs)</label>
@@ -760,8 +754,7 @@ footer {
           <div id="withdrawalResult" class="withdrawal-result hidden">
             <div style="font-weight: 600; margin-bottom: 10px;">Notes to Dispense:</div>
             <div class="withdrawal-breakdown" id="withdrawalBreakdown">
-              <!-- Dynamically populated by JavaScript -->
-            </div>
+              </div>
           </div>
           
           <div class="action-buttons">
@@ -796,13 +789,11 @@ footer {
       </div>
     </section>
 
-    <!-- Right Panel: Transaction Logs -->
     <section class="logs-section">
       <div class="card">
         <h2 class="card-title">📋 Transaction Logs</h2>
         <div class="logs-container" id="transactionLogs">
-          <!-- Dynamically populated by JavaScript -->
-        </div>
+          </div>
       </div>
     </section>
   </main>
@@ -827,15 +818,13 @@ footer {
   </footer>
 </div>
 
-<!-- Opening Balance Modal -->
 <div id="openingBalanceModal" class="modal-overlay hidden">
   <div class="modal">
     <h2 class="modal-title">Set Opening Balance</h2>
     <p class="modal-text">Enter the denomination-wise cash count for opening balance. This will initialize your cash drawer.</p>
     
     <div class="opening-inputs" id="openingInputs">
-      <!-- Dynamically populated by JavaScript -->
-    </div>
+      </div>
     
     <div class="modal-summary">
       <div>Total Opening Balance</div>
@@ -926,8 +915,16 @@ function loadFromStorage() {
       AppState.openingBalance = parsed.openingBalance || 0;
       AppState.totalDeposits = parsed.totalDeposits || 0;
       AppState.totalWithdrawals = parsed.totalWithdrawals || 0;
-      AppState.transactions = parsed.transactions || [];
       AppState.sessionStarted = parsed.sessionStarted || false;
+      
+      // Filter transactions to keep only last 48 hours
+      const rawTransactions = parsed.transactions || [];
+      const cutoffTime = Date.now() - (48 * 60 * 60 * 1000); // 48 hours ago
+      
+      AppState.transactions = rawTransactions.filter(t => {
+        const tTime = new Date(t.timestamp).getTime();
+        return tTime > cutoffTime;
+      });
       
       // Set dark mode from storage
       const darkMode = localStorage.getItem('proteller_dark_mode') === 'true';
@@ -1019,7 +1016,7 @@ function updateCashDrawerDisplay() {
   // Update summary
   document.getElementById('totalNotes').textContent = totalNotes;
   document.getElementById('totalCoins').textContent = totalCoins;
-  document.getElementById('totalCash').textContent = `Rs ${formatCurrency(totalCash)}`;
+  document.getElementById('totalCash').innerHTML = formatRichText(totalCash);
   
   // Update footer
   document.getElementById('footerCash').textContent = `Rs ${formatCurrency(totalCash)}`;
@@ -1142,7 +1139,8 @@ function calculateInputTotal(containerId) {
 function formatCurrency(amount) {
   return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-  // NEW HELPER: Convert number to short form (e.g., 1.5K, 2M)
+
+// NEW HELPER: Convert number to short form (e.g., 1.5K, 2M)
 function formatShort(num) {
   if (num >= 1000000000) return (num / 1000000000).toFixed(2).replace(/\.00$/, '') + 'B';
   if (num >= 1000000) return (num / 1000000).toFixed(2).replace(/\.00$/, '') + 'M';
@@ -1168,7 +1166,6 @@ function numToWords(n) {
 
 // NEW HELPER: Combine Currency + Short Form + Words for display
 function formatRichText(amount) {
-  // Returns: Rs 1,500 (1.5K) <br> <small>One Thousand Five Hundred</small>
   return `Rs ${formatCurrency(amount)} <span style="font-size:0.7em; opacity:0.8;">(${formatShort(amount)})</span>
           <div style="font-size:0.4em; font-weight:400; opacity:0.9; margin-top:2px; letter-spacing:0.5px; text-transform:uppercase;">${numToWords(amount)}</div>`;
 }
@@ -1691,7 +1688,7 @@ function setupEventListeners() {
 // Update deposit total display
 function updateDepositTotal() {
   const total = calculateInputTotal('depositInputs');
-  document.getElementById('depositTotal').textContent = `Rs ${formatCurrency(total)}`;
+  document.getElementById('depositTotal').innerHTML = formatRichText(total);
 }
 
 // Update opening balance total display
@@ -1702,7 +1699,7 @@ function updateOpeningBalanceTotal() {
   const coinsTotal = Array.from(document.querySelectorAll('#openingInputs input[data-type="coin"]'))
     .reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
   
-  document.getElementById('openingBalanceTotal').textContent = `Rs ${formatCurrency(total)}`;
+  document.getElementById('openingBalanceTotal').innerHTML = formatRichText(total);
   document.getElementById('openingNotesTotal').textContent = notesTotal;
   document.getElementById('openingCoinsTotal').textContent = coinsTotal;
 }
@@ -1710,7 +1707,7 @@ function updateOpeningBalanceTotal() {
 // Update withdrawal display
 function updateWithdrawalDisplay() {
   const amount = parseInt(document.getElementById('withdrawalAmount').value) || 0;
-  document.getElementById('withdrawalTotal').textContent = `Rs ${formatCurrency(amount)}`;
+  document.getElementById('withdrawalTotal').innerHTML = formatRichText(amount);
   
   if (amount > 0) {
     const result = calculateWithdrawalBreakdown(amount);
