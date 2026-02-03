@@ -1142,6 +1142,36 @@ function calculateInputTotal(containerId) {
 function formatCurrency(amount) {
   return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+  // NEW HELPER: Convert number to short form (e.g., 1.5K, 2M)
+function formatShort(num) {
+  if (num >= 1000000000) return (num / 1000000000).toFixed(2).replace(/\.00$/, '') + 'B';
+  if (num >= 1000000) return (num / 1000000).toFixed(2).replace(/\.00$/, '') + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(2).replace(/\.00$/, '') + 'K';
+  return num.toString();
+}
+
+// NEW HELPER: Convert number to words
+function numToWords(n) {
+  if (n < 0) return "Minus " + numToWords(-n);
+  if (n === 0) return "Zero";
+  const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+  const b = ['', '', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const convert = (num) => {
+      if (num < 20) return a[num];
+      if (num < 100) return b[Math.floor(num/10)] + (num%10? " " + a[num%10]: "");
+      if (num < 1000) return a[Math.floor(num/100)] + "Hundred " + (num%100? "and " + convert(num%100): "");
+      if (num < 1000000) return convert(Math.floor(num/1000)) + "Thousand " + (num%1000? convert(num%1000): "");
+      return convert(Math.floor(num/1000000)) + "Million " + (num%1000000? convert(num%1000000): "");
+  };
+  return convert(n).trim();
+}
+
+// NEW HELPER: Combine Currency + Short Form + Words for display
+function formatRichText(amount) {
+  // Returns: Rs 1,500 (1.5K) <br> <small>One Thousand Five Hundred</small>
+  return `Rs ${formatCurrency(amount)} <span style="font-size:0.7em; opacity:0.8;">(${formatShort(amount)})</span>
+          <div style="font-size:0.4em; font-weight:400; opacity:0.9; margin-top:2px; letter-spacing:0.5px; text-transform:uppercase;">${numToWords(amount)}</div>`;
+}
 
 // Show message to user
 function showMessage(message, type = 'success') {
