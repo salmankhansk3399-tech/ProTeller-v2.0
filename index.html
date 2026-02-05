@@ -52,10 +52,10 @@ body.dark-mode {
 
 /* Header */
 header {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color), #144c63);
   color: white;
-  padding: 15px 0;
-  box-shadow: var(--shadow);
+  padding: 18px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -68,14 +68,16 @@ header {
 }
 
 .app-title h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .app-title p {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   opacity: 0.9;
   font-style: italic;
+  letter-spacing: 0.3px;
 }
 
 .header-controls {
@@ -85,29 +87,33 @@ header {
 }
 
 .theme-toggle {
-  background-color: rgba(255, 255, 255, 0.15);
-  border: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 8px 15px;
+  padding: 8px 18px;
   border-radius: var(--radius);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  transition: background-color 0.2s;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
 }
 
 .theme-toggle:hover {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
 }
 
 .current-time {
   font-size: 0.9rem;
   font-weight: 600;
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.25);
+  padding: 6px 12px;
   border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
 }
 
 /* Main Layout */
@@ -116,7 +122,7 @@ header {
   grid-template-columns: 1fr 1.5fr 1fr;
   gap: 20px;
   padding: 20px 0;
-  min-height: calc(100vh - 180px);
+  min-height: calc(100vh - 200px);
 }
 
 @media (max-width: 1200px) {
@@ -137,7 +143,7 @@ header {
   
   .header-content {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     text-align: center;
   }
 }
@@ -330,6 +336,37 @@ body.dark-mode .denom-input-group input {
   color: var(--dark-text);
 }
 
+.slip-amount-input {
+  margin: 15px 0;
+  padding: 15px;
+  background-color: rgba(255, 154, 60, 0.1);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--accent-color);
+}
+
+.slip-amount-input label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--accent-color);
+}
+
+.slip-amount-input input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--light-border);
+  border-radius: var(--radius);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+body.dark-mode .slip-amount-input input {
+  background-color: var(--dark-card);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
 .transaction-total {
   background-color: rgba(26, 95, 122, 0.1);
   padding: 15px;
@@ -346,6 +383,33 @@ body.dark-mode .denom-input-group input {
 
 body.dark-mode .transaction-amount {
   color: var(--secondary-color);
+}
+
+.difference-display {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.difference-matched {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--success-color);
+  border: 2px solid var(--success-color);
+}
+
+.difference-excess {
+  background-color: rgba(255, 167, 38, 0.1);
+  color: var(--warning-color);
+  border: 2px solid var(--warning-color);
+}
+
+.difference-short {
+  background-color: rgba(255, 107, 107, 0.1);
+  color: var(--danger-color);
+  border: 2px solid var(--danger-color);
 }
 
 .action-buttons {
@@ -558,10 +622,11 @@ body.dark-mode .modal-title {
 
 /* Footer */
 footer {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color), #144c63);
   color: white;
-  padding: 15px 0;
+  padding: 18px 0;
   margin-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer-content {
@@ -573,28 +638,64 @@ footer {
 @media (max-width: 768px) {
   .footer-content {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     text-align: center;
   }
 }
 
+.footer-left {
+  flex: 1;
+}
+
+.footer-right {
+  flex: 1;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .footer-right {
+    text-align: center;
+  }
+}
+
+.footer-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.footer-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
 .balance-summary {
   display: flex;
-  gap: 20px;
+  gap: 25px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .balance-summary {
+    justify-content: center;
+  }
 }
 
 .balance-item {
   text-align: center;
+  min-width: 120px;
 }
 
 .balance-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   opacity: 0.9;
+  margin-bottom: 5px;
 }
 
 .balance-value {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 /* Utility Classes */
@@ -725,9 +826,18 @@ footer {
           <div class="denom-inputs" id="depositInputs">
             </div>
           
+          <!-- Slip Amount Input -->
+          <div class="slip-amount-input">
+            <label for="slipAmount">Amount (Rs)</label>
+            <input type="number" id="slipAmount" min="0" step="1" placeholder="Enter amount">
+          </div>
+          
           <div class="transaction-total">
             <div>Total Deposit Amount</div>
             <div class="transaction-amount" id="depositTotal">Rs 0</div>
+            <div id="depositDifference" class="difference-display hidden">
+              <!-- Will be filled by JavaScript -->
+            </div>
           </div>
           
           <div class="action-buttons">
@@ -800,9 +910,9 @@ footer {
 
   <footer>
     <div class="footer-content">
-      <div>
-        <div style="font-weight: 700;">ProTeller v2 - Bank Teller System</div>
-        <div style="font-size: 0.9rem; opacity: 0.9;">© 2026 Salman Khan. All rights reserved.</div>
+      <div class="footer-left">
+        <div class="footer-title">ProTeller v2</div>
+        <div class="footer-subtitle">Bank Teller System © 2026</div>
       </div>
       <div class="balance-summary">
         <div class="balance-item">
@@ -810,7 +920,7 @@ footer {
           <div class="balance-value" id="footerCash">Rs 0</div>
         </div>
         <div class="balance-item">
-          <div class="balance-label">Today's Transactions</div>
+          <div class="balance-label">Transactions</div>
           <div class="balance-value" id="footerTransactions">0</div>
         </div>
       </div>
@@ -1140,7 +1250,7 @@ function formatCurrency(amount) {
   return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-// NEW HELPER: Convert number to short form (e.g., 1.5K, 2M)
+// Convert number to short form (e.g., 1.5K, 2M)
 function formatShort(num) {
   if (num >= 1000000000) return (num / 1000000000).toFixed(2).replace(/\.00$/, '') + 'B';
   if (num >= 1000000) return (num / 1000000).toFixed(2).replace(/\.00$/, '') + 'M';
@@ -1148,7 +1258,7 @@ function formatShort(num) {
   return num.toString();
 }
 
-// NEW HELPER: Convert number to words
+// Convert number to words
 function numToWords(n) {
   if (n < 0) return "Minus " + numToWords(-n);
   if (n === 0) return "Zero";
@@ -1164,7 +1274,7 @@ function numToWords(n) {
   return convert(n).trim();
 }
 
-// NEW HELPER: Combine Currency + Short Form + Words for display
+// Combine Currency + Short Form + Words for display
 function formatRichText(amount) {
   return `Rs ${formatCurrency(amount)} <span style="font-size:0.7em; opacity:0.8;">(${formatShort(amount)})</span>
           <div style="font-size:0.4em; font-weight:400; opacity:0.9; margin-top:2px; letter-spacing:0.5px; text-transform:uppercase;">${numToWords(amount)}</div>`;
@@ -1398,6 +1508,18 @@ function processDeposit(inputValues) {
     return false;
   }
   
+  // Get slip amount
+  const slipAmount = parseInt(document.getElementById('slipAmount').value) || 0;
+  const difference = totalAmount - slipAmount;
+  
+  // Show warning if there's a significant difference
+  if (slipAmount > 0 && Math.abs(difference) > 100) {
+    const diffText = difference > 0 ? `Excess: Rs ${formatCurrency(difference)}` : `Short: Rs ${formatCurrency(Math.abs(difference))}`;
+    if (!confirm(`There's a difference between Enterd amount and counted cash:\n\nSlip Amount: Rs ${formatCurrency(slipAmount)}\nCounted Cash: Rs ${formatCurrency(totalAmount)}\nDifference: ${diffText}\n\nProceed anyway?`)) {
+      return false;
+    }
+  }
+  
   // Add transaction
   addTransaction('deposit', totalAmount, breakdown);
   
@@ -1531,6 +1653,7 @@ function setupEventListeners() {
   // Deposit actions
   document.getElementById('clearDepositBtn').addEventListener('click', () => {
     createDenominationInputs('depositInputs', updateDepositTotal);
+    document.getElementById('slipAmount').value = '';
     updateDepositTotal();
   });
   
@@ -1552,9 +1675,13 @@ function setupEventListeners() {
     
     if (processDeposit(inputValues)) {
       createDenominationInputs('depositInputs', updateDepositTotal);
+      document.getElementById('slipAmount').value = '';
       updateDepositTotal();
     }
   });
+  
+  // Slip amount input event
+  document.getElementById('slipAmount').addEventListener('input', updateDepositTotal);
   
   // Withdrawal actions
   document.getElementById('withdrawalAmount').addEventListener('input', updateWithdrawalDisplay);
@@ -1685,10 +1812,31 @@ function setupEventListeners() {
   });
 }
 
-// Update deposit total display
+// Update deposit total display with slip amount difference
 function updateDepositTotal() {
   const total = calculateInputTotal('depositInputs');
+  const slipAmount = parseInt(document.getElementById('slipAmount').value) || 0;
+  const difference = total - slipAmount;
+  const differenceElem = document.getElementById('depositDifference');
+  
   document.getElementById('depositTotal').innerHTML = formatRichText(total);
+  
+  if (slipAmount > 0) {
+    differenceElem.classList.remove('hidden');
+    
+    if (difference === 0) {
+      differenceElem.className = 'difference-display difference-matched';
+      differenceElem.innerHTML = `✓ Matched: Enterd Rs ${formatCurrency(slipAmount)} = Counted Rs ${formatCurrency(total)}`;
+    } else if (difference > 0) {
+      differenceElem.className = 'difference-displaye difference-excess';
+      differenceElem.innerHTML = `▲ Excess: Counted Rs ${formatCurrency(total)} - Entered Rs ${formatCurrency(slipAmount)} = +Rs ${formatCurrency(difference)}`;
+    } else {
+      differenceElem.className = 'difference-display difference-short';
+      differenceElem.innerHTML = `▼ Short: Entered Rs ${formatCurrency(slipAmount)} - Counted Rs ${formatCurrency(total)} = -Rs ${formatCurrency(Math.abs(difference))}`;
+    }
+  } else {
+    differenceElem.classList.add('hidden');
+  }
 }
 
 // Update opening balance total display
